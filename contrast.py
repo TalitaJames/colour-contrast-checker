@@ -3,6 +3,7 @@ import random
 import math
 from PIL import Image, ImageDraw, ImageFont 
 
+# makes a single square image with the contrast ratio and hex values
 def imageContrastExample(hexFG, hexBG,contrastMin):
     
     #region font and coordinates
@@ -14,7 +15,7 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
     # Fonts
     normalFont=ImageFont.truetype("arial.ttf",18)
     largeFont=ImageFont.truetype("arial.ttf",24)
-    hexFont=ImageFont.truetype("arial.ttf",30)
+    hexFont=ImageFont.truetype("arial.ttf",45)
     crFont=ImageFont.truetype("arial.ttf",130)
     
     
@@ -40,8 +41,8 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
     #endregion
     
     #region hex and ratio text
-    hexString=f"F: {hexFG}\nB: {hexBG}"
-    contrastDraw.multiline_text((width-175, width-75), hexString, fill=hexFG, font=hexFont)
+    hexString=f"F:{hexFG}  B:{hexBG}"
+    contrastDraw.multiline_text((10, width-75), hexString, fill=hexFG, font=hexFont)
     contrastDraw.text((width//2, 30+width//2), str(contrastRatio(hexFG, hexBG)), fill=hexFG, font=crFont,anchor='mm')
     #endregion
     
@@ -75,9 +76,8 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
     
     return contrastSquare
 
-
-def squareGrid(hexList,squareDim):
-    contrastMin=4.5
+# uses imageContrastExample to make a grid of all possible combinations
+def squareGrid(hexList,squareDim,contrastMin):
     squareSize = int(math.sqrt(len(hexList)))
     
     gridContrast=Image.new('RGB', (squareSize*squareDim, squareSize*squareDim), color = 'white')
@@ -108,7 +108,7 @@ def listSquare(hexList):
     return listSquare
 
 
-#region colour methods
+#region colour maths methods
 
 def contrastRatio(hexFG, hexBG):
     lumFG = relativeLuminance(hexFG)
@@ -170,15 +170,35 @@ def randomHex():
 
 
 if __name__ == '__main__':
-    hexList=[] #["#23599A", "#E54726", "#2BB250", "#363636", "#FFFFFF"]
-    
-    for i in range(6):
-        hexList.append(randomHex())
 
+    contrastMin="start"
+    # while contrastMin isn't a number and isn't blank
+    while not contrastMin.isnumeric() and contrastMin != '':
+        contrastMin=input("Contrast Ratio: ")
+        if contrastMin =='':
+            contrastMin=4.5
+            break
+        elif contrastMin.isnumeric(): 
+            contrastMin=float(contrastMin)
+            break
+    
+    
+    
+    hexList=[]
+    while len(hexList)==0:
+        stringIn=input("Hex list: ")
+        if not stringIn:
+            hexList=[randomHex() for i in range(3)]
+        else: 
+            hexList = re.findall("#.{6}", stringIn)  
+        
+    
+    
+    print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
 
     hexSquare = listSquare(hexList)
-    print(f"\n{hexSquare}")
-    squareGrid(hexSquare, 500)
+    # print(f"\nfull hex square\t{hexSquare}")
+    squareGrid(hexSquare, 500,contrastMin)
     print("done")
     
     
