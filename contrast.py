@@ -168,10 +168,15 @@ def randomHex():
 
 #endregion
 
-
-if __name__ == '__main__':
-
+# uses input() to get contrast & hex info from user
+def getInfo():
+    
+    WCAGdict = {'AA-N':4.5, 'AA-L':3, 'AAA-N':7, 'AAA-L':4.5}
+    
+    # ------- Contrast -------
+    
     contrastMin="start"
+    print("\nEnter a number, leave blank, or type 'AA-n' or 'AA-L' per your WCAG requirements")
     # while contrastMin isn't a number and isn't blank
     while not contrastMin.isnumeric() and contrastMin != '':
         contrastMin=input("Contrast Ratio: ")
@@ -181,25 +186,34 @@ if __name__ == '__main__':
         elif contrastMin.isnumeric(): 
             contrastMin=float(contrastMin)
             break
+        elif contrastMin.upper() in WCAGdict:
+            contrastMin=WCAGdict[contrastMin.upper()]
+            break
     
-    
+    # ------- Hex List -------
     
     hexList=[]
+    print("\n\nEnter list of hex codes (starting with '#'), or leave blank for 3 random")
     while len(hexList)==0:
         stringIn=input("Hex list: ")
         if not stringIn:
             hexList=[randomHex() for i in range(3)]
         else: 
             hexList = re.findall("#.{6}", stringIn)  
-        
     
+    return contrastMin,hexList
+
+if __name__ == '__main__':
+
+      
+    contrastMin,hexList=getInfo()
     
     print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
 
     hexSquare = listSquare(hexList)
     # print(f"\nfull hex square\t{hexSquare}")
     squareGrid(hexSquare, 500,contrastMin)
-    print("done")
+    print("Photo Saved")
     
     
     
