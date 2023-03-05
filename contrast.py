@@ -3,19 +3,17 @@ import random
 import math
 from PIL import Image, ImageDraw, ImageFont 
 
+#region image gen methods
+
 # makes a single square image with the contrast ratio and hex values
 def imageContrastExample(hexFG, hexBG,contrastMin):
     
     #region font and coordinates
-    
-    # Coordinates
+    # ---- Coordinates
     width=500 #size of the square
-    xText,yText=50,370
     
-    # Fonts
-    normalFont=ImageFont.truetype("arial.ttf",18)
-    largeFont=ImageFont.truetype("arial.ttf",24)
-    hexFont=ImageFont.truetype("arial.ttf",45)
+    # ---- Fonts
+    hexFont=ImageFont.truetype("arial.ttf",65)
     crFont=ImageFont.truetype("arial.ttf",130)
     
     
@@ -41,38 +39,12 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
     #endregion
     
     #region hex and ratio text
-    hexString=f"F:{hexFG}  B:{hexBG}"
-    contrastDraw.multiline_text((10, width-75), hexString, fill=hexFG, font=hexFont)
+    hexString=f"F {hexFG.upper()}\nB {hexBG.upper()}"
+    contrastDraw.multiline_text((width//2, width-75), hexString, fill=hexFG, font=hexFont,anchor='mm')
     contrastDraw.text((width//2, 30+width//2), str(contrastRatio(hexFG, hexBG)), fill=hexFG, font=crFont,anchor='mm')
     #endregion
     
-    #region WCAG text
-    #text string
-    colourInfo=f"foreground: {hexFG}, background: {hexBG}"
-    pangram="Sphinx of black quartz, judge my vow"
-    fails="F"
-    passes="P"
-    
-    # normal text
-    # WCAG 2.0 level AA at least 4.5:1 and Lvl AAA 7:1 for normal text
-    
-    contrastNormalString=f'Normal text:{passes if contrastRatio(hexFG, hexBG) >= 4.5 else fails} Level AA, {passes if contrastRatio(hexFG, hexBG) >= 7 else fails} Level AAA'
-    contrastDraw.text((xText, yText), contrastNormalString, fill=hexFG, font=normalFont)
-   
-   
-   
-    # # large text
-    # Large text is defined as 14 point (typically 18.66px) and bold or larger, or 18 point (typically 24px) or larger.
-    # WCAG 2.0 level AA: 3:1 and Level AAA: 4.5:1
-    contrastLargeString=f'Large text:{passes if contrastRatio(hexFG, hexBG) >= 3 else fails} Level AA, {passes if contrastRatio(hexFG, hexBG) >= 4.5 else fails} Level AAA'
-    contrastDraw.text((xText, yText+20), contrastLargeString, fill=hexFG, font=largeFont)
-    
-    # graphics and user interface components
-    #  WCAG 2.1 requires a contrast ratio of at least 3:1 for graphics ect
-    
-    
-    #endregion
-    
+  
     
     return contrastSquare
 
@@ -97,6 +69,9 @@ def squareGrid(hexList,squareDim,contrastMin):
     
     gridContrast.save("gridContrast.png")
  
+#endregion
+
+
 # turns a list into a 2d list of all possible combinations   
 def listSquare(hexList):
     listSquare=[]
@@ -176,16 +151,21 @@ def getInfo():
     # ------- Contrast -------
     
     contrastMin="start"
-    print("\nEnter a number, leave blank, or type 'AA-n' or 'AA-L' per your WCAG requirements")
+    print("\nEnter a number, leave blank, or type 'AA-N or 'AA-L' per your WCAG requirements")
     # while contrastMin isn't a number and isn't blank
     while not contrastMin.isnumeric() and contrastMin != '':
         contrastMin=input("Contrast Ratio: ")
         if contrastMin =='':
             contrastMin=4.5
             break
-        elif contrastMin.isnumeric(): 
+        elif re.sub("(\.|-)", "", contrastMin).isnumeric(): # regex out the decimal point & neg sign to check if all numbers
             contrastMin=float(contrastMin)
-            break
+            if contrastMin>21 or contrastMin<1:
+                print("\tMust be between 1 and 21 inclusive")
+                contrastMin="try again"
+            else:
+                contrastMin=float(contrastMin)
+                break
         elif contrastMin.upper() in WCAGdict:
             contrastMin=WCAGdict[contrastMin.upper()]
             break
@@ -193,11 +173,14 @@ def getInfo():
     # ------- Hex List -------
     
     hexList=[]
-    print("\n\nEnter list of hex codes (starting with '#'), or leave blank for 3 random")
+    print("\n\nEnter list of hex codes (starting with '#'), int for x random, leave blank for 3")
     while len(hexList)==0:
         stringIn=input("Hex list: ")
         if not stringIn:
             hexList=[randomHex() for i in range(3)]
+        elif stringIn.isnumeric():
+            hexList=[randomHex() for i in range(int(stringIn))]
+
         else: 
             hexList = re.findall("#.{6}", stringIn)  
     
@@ -208,12 +191,12 @@ if __name__ == '__main__':
       
     contrastMin,hexList=getInfo()
     
-    print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
+    # print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
 
     hexSquare = listSquare(hexList)
     # print(f"\nfull hex square\t{hexSquare}")
     squareGrid(hexSquare, 500,contrastMin)
-    print("Photo Saved")
+    print("\nPhoto Saved")
     
     
     
