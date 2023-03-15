@@ -25,8 +25,8 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
     
     
     #region icons (tick/cross)
-    cross=Image.open('icon_cross.png')
-    tick=Image.open('icon_tick.png')
+    cross=Image.open('graphics\icon_cross.png')
+    tick=Image.open('graphics\icon_tick.png')
     
     scale=0.5
     cross=cross.resize((int(scale*cross.width),int(scale*cross.height)))
@@ -66,10 +66,17 @@ def squareGrid(hexList,squareDim,contrastMin):
             pass
         
     
-    
-    gridContrast.save("gridContrast.png")
+    return gridContrast
+ 
+def squareGrid_noBlank(hexList,squareDim,contrastMin):
+    print("not implemented")
+    # do the same as squareGrid but don't include the same colour in both boxes diagonal
+    pass
  
 #endregion
+
+
+
 
 
 # turns a list into a 2d list of all possible combinations   
@@ -157,6 +164,7 @@ def getInfo():
         contrastMin=input("Contrast Ratio: ")
         if contrastMin =='':
             contrastMin=4.5
+            print("\tWCAG value:",contrastMin)
             break
         elif re.sub("(\.|-)", "", contrastMin).isnumeric(): # regex out the decimal point & neg sign to check if all numbers
             contrastMin=float(contrastMin)
@@ -168,6 +176,7 @@ def getInfo():
                 break
         elif contrastMin.upper() in WCAGdict:
             contrastMin=WCAGdict[contrastMin.upper()]
+            print("\tWCAG value:",contrastMin)
             break
     
     # ------- Hex List -------
@@ -178,9 +187,12 @@ def getInfo():
         stringIn=input("Hex list: ")
         if not stringIn:
             hexList=[randomHex() for i in range(3)]
+            print(f"\t{hexList}")
+            
         elif stringIn.isnumeric():
             hexList=[randomHex() for i in range(int(stringIn))]
-
+            print(f"\t{hexList}")
+            
         else: 
             hexList = re.findall("#.{6}", stringIn)  
     
@@ -193,9 +205,14 @@ if __name__ == '__main__':
     
     # print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
 
+    square=imageContrastExample(hexList[0],hexList[1],contrastMin)
+    square.save("graphics\example_squareContrast.png")
+
     hexSquare = listSquare(hexList)
-    # print(f"\nfull hex square\t{hexSquare}")
-    squareGrid(hexSquare, 500,contrastMin)
+    # print(f"\nfull hex square\t{hexSquare}")    
+    gridContrast=squareGrid(hexSquare, 500,contrastMin)
+    gridContrast.save("graphics\example_gridContrast_blanks.png")
+    
     print("\nPhoto Saved")
     
     
