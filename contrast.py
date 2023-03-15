@@ -205,7 +205,7 @@ if __name__ == '__main__':
     
     # print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
 
-    square=imageContrastExample(hexList[0],hexList[1],contrastMin)
+    square=imageContrastExample("#F9F7F1","#EE316B",contrastMin)
     square.save("graphics\example_squareContrast.png")
 
     hexSquare = listSquare(hexList)
