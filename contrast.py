@@ -53,7 +53,6 @@ def squareGrid(hexList,squareDim,contrastMin):
     squareSize = int(math.sqrt(len(hexList)))
     
     gridContrast=Image.new('RGB', (squareSize*squareDim, squareSize*squareDim), color = 'white')
-    gridDraw = ImageDraw.Draw(gridContrast)  
     
     
     
@@ -63,15 +62,44 @@ def squareGrid(hexList,squareDim,contrastMin):
             y=j*squareDim
             image=imageContrastExample(hexList[i*squareSize+j][0],hexList[i*squareSize+j][1],contrastMin)
             gridContrast.paste(image, (x,y))
-            pass
+            
         
     
     return gridContrast
  
+# does the same as squareGrid but don't include the same colour in both boxes diagonal
 def squareGrid_noBlank(hexList,squareDim,contrastMin):
-    print("not implemented")
-    # do the same as squareGrid but don't include the same colour in both boxes diagonal
-    pass
+    
+    hexList = [x for x in hexList if x[0]!=x[1]] # Gets rid of same matches
+    return squareGrid(hexList,squareDim,contrastMin)
+    squareSize = int(math.sqrt(len(hexList)))
+    
+    gridContrast=Image.new('RGB', ((squareSize-1)*squareDim, squareSize*squareDim), color = 'white') 
+    gridContrast_Draw=ImageDraw.Draw(gridContrast)
+    
+    font = ImageFont.truetype("arial.ttf", 70)
+    
+    for i in range(squareSize-1):
+        x=i*squareDim
+        for j in range(squareSize):
+            y=j*squareDim
+            
+            FG=hexList[i*squareSize+j][0]
+            BG=hexList[i*squareSize+j][1]
+            print(f'F:{FG}, B:{BG} at {i},{j}\t{"MATCH" if (FG==BG) else "DIFF"} and {"Match" if i==j else "diff"}')
+
+            if (i==j):
+                image=Image.new("RGB", [squareDim,squareDim]) 
+        
+            else:
+                image=imageContrastExample(hexList[i*squareSize+j][0],hexList[i*squareSize+j][1],contrastMin)
+            
+            gridContrast.paste(image, (x,y))
+            gridContrast_Draw.text([x+50,y+50],f"{i},{j}",fill="White",font=font)
+            
+        
+    
+    return gridContrast
  
 #endregion
 
@@ -112,8 +140,9 @@ def relativeLuminance(hex):
     gRatio = g/255
     bRatio = b/255
     
+    # i don't know why these numbers, blame the WACG
 
-    if rRatio <= 0.03928:
+    if rRatio <= 0.03928: 
         R = rRatio/12.92 
     else: 
         R = ((rRatio+0.055)/1.055) ** 2.4
@@ -142,11 +171,12 @@ def hexToRGB(hex):
     g = int(hex[2:4], 16)
     b = int(hex[4:6], 16)
     
+    
     return r,g,b
 
 #returns a rransom hex colour in string "#______" format
 def randomHex():
-    return '#%02x%02x%02x' % (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+    return '#%02x%02x%02x' % (random.randint(0,255), random.randint(0,255), random.randint(0,255))
 
 #endregion
 
@@ -199,22 +229,28 @@ def getInfo():
     return contrastMin,hexList
 
 if __name__ == '__main__':
-
-      
     contrastMin,hexList=getInfo()
+    print(f"\n\tContrast: {contrastMin}\n\thexList: {hexList}")
     
-    # print(f"\n\tcontrast: {contrastMin}\n\thexList: {hexList}")
-
-    square=imageContrastExample("#F9F7F1","#EE316B",contrastMin)
-    square.save("graphics\example_squareContrast.png")
+    
+    pic=squareGrid_noBlank(listSquare(hexList),500,contrastMin)
+    pic.save("test.png")
+            
+    version="v1.2"
+    
+    # square=imageContrastExample(randomHex(),randomHex(),contrastMin)
+    # square.save(f"graphics\export_squareContrast_{version}.png")
 
     hexSquare = listSquare(hexList)
     # print(f"\nfull hex square\t{hexSquare}")    
-    gridContrast=squareGrid(hexSquare, 500,contrastMin)
-    gridContrast.save("graphics\example_gridContrast_blanks.png")
+    gridContrast_blanks=squareGrid(hexSquare,500,contrastMin)
+    gridContrast_blanks.save(f"graphics\export_gridContrast_blanks_{version}.png")
+    
+    gridContrast=squareGrid_noBlank(hexSquare,500,contrastMin)
+    gridContrast.save(f"graphics\export_gridContrast_{version}.png")
     
     print("\nPhoto Saved")
-    
-    
-    
-    
+        
+        
+        
+        
