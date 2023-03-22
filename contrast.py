@@ -219,15 +219,17 @@ if __name__ == '__main__':
     hexSquare_min=listSquare(hexList,False)
             
     version="v1.4"
+    fileName=f"example" #export_{version}"
+    
     
     square=imageContrastExample(hexSquare_min[0][0],contrastMin)
-    square.save(f"graphics\export_squareContrast_{version}.png")
+    square.save(f"graphics\{fileName}_square.png")
 
     gridContrast_blanks=constrastGrid(hexSquare_all,500,contrastMin)
-    gridContrast_blanks.save(f"graphics\export_{version}_gridContrast_all.png")
+    gridContrast_blanks.save(f"graphics\{fileName}_all.png")
     
     gridContrast=constrastGrid(hexSquare_min,500,contrastMin)
-    gridContrast.save(f"graphics\export_{version}_gridContrast_min.png")
+    gridContrast.save(f"graphics\{fileName}_min.png")
     
     print("\nPhoto Saved")
         
