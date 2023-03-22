@@ -6,9 +6,12 @@ from PIL import Image, ImageDraw, ImageFont
 #region image gen methods
 
 # makes a single square image with the contrast ratio and hex values
-def imageContrastExample(hexFG, hexBG,contrastMin):
+def imageContrastExample(hexTuple,contrastMin):
     
-    #region font and coordinates
+    hexBG=hexTuple[0]
+    hexFG=hexTuple[1]
+    
+    
     # ---- Coordinates
     width=500 #size of the square
     
@@ -16,10 +19,7 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
     hexFont=ImageFont.truetype("arial.ttf",65)
     crFont=ImageFont.truetype("arial.ttf",130)
     
-    
-    #endregion
-    
-    
+ 
     contrastSquare=Image.new('RGB', (width, width), color = hexBG)
     contrastDraw = ImageDraw.Draw(contrastSquare)  
     
@@ -47,73 +47,53 @@ def imageContrastExample(hexFG, hexBG,contrastMin):
   
     
     return contrastSquare
-
-# uses imageContrastExample to make a grid of all possible combinations
-def squareGrid(hexList,squareDim,contrastMin):
-    squareSize = int(math.sqrt(len(hexList)))
-    
-    gridContrast=Image.new('RGB', (squareSize*squareDim, squareSize*squareDim), color = 'white')
-    
-    
-    
-    for i in range(squareSize):
-        x=i*squareDim
-        for j in range(squareSize):
-            y=j*squareDim
-            image=imageContrastExample(hexList[i*squareSize+j][0],hexList[i*squareSize+j][1],contrastMin)
-            gridContrast.paste(image, (x,y))
-            
-        
-    
-    return gridContrast
  
 # does the same as squareGrid but don't include the same colour in both boxes diagonal
-def squareGrid_noBlank(hexList,squareDim,contrastMin):
+def constrastGrid(hexList,squareDim,contrastMin):
     
-    hexList = [x for x in hexList if x[0]!=x[1]] # Gets rid of same matches
-    return squareGrid(hexList,squareDim,contrastMin)
-    squareSize = int(math.sqrt(len(hexList)))
     
-    gridContrast=Image.new('RGB', ((squareSize-1)*squareDim, squareSize*squareDim), color = 'white') 
-    gridContrast_Draw=ImageDraw.Draw(gridContrast)
+    # squareSize = int(math.sqrt(len(hexList)))
+    cols=len(hexList[0])
+    rows=len(hexList)
     
-    font = ImageFont.truetype("arial.ttf", 70)
+    gridContrast=Image.new('RGB', (cols*squareDim, rows*squareDim), color = 'white')
+     
+    # gridContrast_Draw=ImageDraw.Draw(gridContrast)
     
-    for i in range(squareSize-1):
+    # font = ImageFont.truetype("arial.ttf", 70)
+    
+    for i in range(cols):
         x=i*squareDim
-        for j in range(squareSize):
+        for j in range(rows):
             y=j*squareDim
             
-            FG=hexList[i*squareSize+j][0]
-            BG=hexList[i*squareSize+j][1]
-            print(f'F:{FG}, B:{BG} at {i},{j}\t{"MATCH" if (FG==BG) else "DIFF"} and {"Match" if i==j else "diff"}')
-
-            if (i==j):
-                image=Image.new("RGB", [squareDim,squareDim]) 
-        
-            else:
-                image=imageContrastExample(hexList[i*squareSize+j][0],hexList[i*squareSize+j][1],contrastMin)
+            image=imageContrastExample(hexList[j][i],contrastMin)
             
             gridContrast.paste(image, (x,y))
-            gridContrast_Draw.text([x+50,y+50],f"{i},{j}",fill="White",font=font)
-            
-        
+            # gridContrast_Draw.text([x+50,y+50],f"{i},{j}",fill="White",font=font)        
     
     return gridContrast
  
 #endregion
 
 
-
-
-
-# turns a list into a 2d list of all possible combinations   
-def listSquare(hexList):
+# turns a list into a 2d list of tupple=[row][column] (background, forground)
+def listSquare(hexList, match=True):
     listSquare=[]
-    for hexBG in range(len(hexList)):
-        for hexFG in range(len(hexList)):
-            listSquare.append([hexList[hexBG],hexList[hexFG]])
+    
+    for hexBG in hexList:
+        listRow=[]
+        for hexFG in hexList:
+            colourCombo= (hexBG,hexFG) if (match or hexBG!=hexFG) else "REMOVE"
+            listRow.append(colourCombo)
+        listSquare.append(listRow)
+    
             
+    if not match:
+        for row in listSquare:
+            for col in row: # column number and value
+                if col == "REMOVE":
+                    row.remove(col)
     
     return listSquare
 
@@ -194,7 +174,7 @@ def getInfo():
         contrastMin=input("Contrast Ratio: ")
         if contrastMin =='':
             contrastMin=4.5
-            print("\tWCAG value:",contrastMin)
+            # print("\tWCAG value:",contrastMin)
             break
         elif re.sub("(\.|-)", "", contrastMin).isnumeric(): # regex out the decimal point & neg sign to check if all numbers
             contrastMin=float(contrastMin)
@@ -217,11 +197,11 @@ def getInfo():
         stringIn=input("Hex list: ")
         if not stringIn:
             hexList=[randomHex() for i in range(3)]
-            print(f"\t{hexList}")
+            # print(f"\t{hexList}")
             
-        elif stringIn.isnumeric():
+        elif stringIn.isnumeric() and 2<=int(stringIn)<=10:
             hexList=[randomHex() for i in range(int(stringIn))]
-            print(f"\t{hexList}")
+            # print(f"\t{hexList}")
             
         else: 
             hexList = re.findall("#.{6}", stringIn)  
@@ -229,25 +209,25 @@ def getInfo():
     return contrastMin,hexList
 
 if __name__ == '__main__':
+    
+    
+            
     contrastMin,hexList=getInfo()
     print(f"\n\tContrast: {contrastMin}\n\thexList: {hexList}")
     
-    
-    pic=squareGrid_noBlank(listSquare(hexList),500,contrastMin)
-    pic.save("test.png")
+    hexSquare_all=listSquare(hexList,True)
+    hexSquare_min=listSquare(hexList,False)
             
-    version="v1.2"
+    version="v1.4"
     
-    # square=imageContrastExample(randomHex(),randomHex(),contrastMin)
-    # square.save(f"graphics\export_squareContrast_{version}.png")
+    square=imageContrastExample(hexSquare_min[0][0],contrastMin)
+    square.save(f"graphics\export_squareContrast_{version}.png")
 
-    hexSquare = listSquare(hexList)
-    # print(f"\nfull hex square\t{hexSquare}")    
-    gridContrast_blanks=squareGrid(hexSquare,500,contrastMin)
-    gridContrast_blanks.save(f"graphics\export_gridContrast_blanks_{version}.png")
+    gridContrast_blanks=constrastGrid(hexSquare_all,500,contrastMin)
+    gridContrast_blanks.save(f"graphics\export_{version}_gridContrast_all.png")
     
-    gridContrast=squareGrid_noBlank(hexSquare,500,contrastMin)
-    gridContrast.save(f"graphics\export_gridContrast_{version}.png")
+    gridContrast=constrastGrid(hexSquare_min,500,contrastMin)
+    gridContrast.save(f"graphics\export_{version}_gridContrast_min.png")
     
     print("\nPhoto Saved")
         
