@@ -6,7 +6,7 @@ A grid of the contrast, made by `contrastGrid()` has input of `AA-N` and `'#e8a1
 
 <img src="graphics\example_all.png"  width="50%">
 
-Note that on the diagonal, the colours are identical and as such nothing is seen, the contrast ratio is exactly 1 (no contrast). A rectangle can be created through the same method but by parsing `match=False` into `listSquare(hexString)`
+Note that on the diagonal, the colours are identical and as such nothing is seen, the contrast ratio is exactly 1 (no contrast). A rectangle can be created through the same method but by parsing `match=False` into `listSquare(hexString, False)`
 
 <img src="graphics\example_min.png"  width="50%">
 
@@ -28,4 +28,5 @@ Each of these values accept one of the dotpoints as an input (not case sensitive
 **Hex List:** 
 - empty (will randomly generate 3 hex values) 
 - string that gets regexes to take the first 6 values after every `#`
-- int will rng that many hex values
+- int will rng that many hex values (must be 2<=n<=10)
+ 

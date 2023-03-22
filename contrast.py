@@ -219,7 +219,7 @@ if __name__ == '__main__':
     hexSquare_min=listSquare(hexList,False)
             
     version="v1.4"
-    fileName=f"example" #export_{version}"
+    fileName=f"export_{version}"
     
     
     square=imageContrastExample(hexSquare_min[0][0],contrastMin)
