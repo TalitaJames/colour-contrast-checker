@@ -1,1 +1,3 @@
 graphics/export*.png
+graphics/Ed/*
+__pycache__/*
